@@ -44,12 +44,21 @@ module OmniAuth
         raw_info
       end
 
-      def raw_info
+      def raw_info(tries = 3)
         return @raw_info if @raw_info
 
         access_token.options[:mode] = :query
 
         @raw_info = access_token.get('oauth/userinfo').parsed
+      rescue Faraday::ConnectionFailed => e
+        tries -= 1
+
+        if tries <= 0
+          raise
+        else
+          sleep(1)
+          raw_info(tries)
+        end
       end
 
       private
