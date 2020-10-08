@@ -63,6 +63,19 @@ module OmniAuth
 
       private
 
+      def build_access_token(tries = 3)
+        super
+      rescue Faraday::ConnectionFailed => e
+        tries -= 1
+
+        if tries <= 0
+          raise
+        else
+          sleep(1)
+          build_access_token(tries)
+        end
+      end
+
       def callback_url
         full_host + script_name + callback_path
       end
