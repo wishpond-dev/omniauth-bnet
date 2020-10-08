@@ -63,16 +63,18 @@ module OmniAuth
 
       private
 
-      def build_access_token(tries = 3)
+      def build_access_token
+        @access_token_tries ||= 3
         super
       rescue Faraday::ConnectionFailed => e
-        tries -= 1
+        @access_token_tries -= 1
 
-        if tries <= 0
+        if @access_token_tries <= 0
+          @access_token_tries = nil
           raise
         else
           sleep(1)
-          build_access_token(tries)
+          retry
         end
       end
 
